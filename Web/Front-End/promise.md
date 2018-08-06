@@ -128,8 +128,57 @@
 
 ### 執行流程與錯誤處理
 
+- Promise中會吞掉(隱藏)throw例外的錯誤輸出，改用轉變狀態為rejected(已拒絕)來作錯誤處理
 
+- 因為Promise物件在進行初始化時，執行的每一個回調，都是在try...catch語句的區塊中執行，才會在就算有錯誤發生時，並不會造成連鎖的中斷，而是改變Promise的狀態為rejected(已拒絕)，然後再向下一個連鎖傳遞。
 
+- 使用throw語句與用reject方法似乎是同樣的結果，都會導致promise物件的狀態變為rejected(已拒絕)，那麼這兩種方式有差異嗎？
+  - throw語句用於一般的程式碼中，它代表的意義是程式執行到某個時候發生錯誤，也就是throw語句會立即完成resolve(解決)，在then方法中按照規則，不論是onFulfilled函式或onRejected函式，只要丟出例外，就會導致新的promise物件的狀態直接變為Rejected(已拒絕)。
+  - reject則是一個一旦呼叫了就會讓Promise物件狀態變為Rejected(已拒絕)的方法，用起來像是一般的可呼叫的方法。
+
+- 流程的主要規則在Promises/A+標準 2.2.7章節，內容如下:
+  - then必須回傳一個promise。 
+  ```js
+  promise2 = promise1.then(onFulfilled, onRejected);
+  ```
+  - 2.2.7.1 當不論是onFulfilled或onRejected其中有一個是有回傳值x，執行Promise解析程序
+  [[Resolve]](promise2, x)
+  - 2.2.7.2 當不論是onFulfilled或onRejected其一丟出例外e，promise2必須用e作為理由而拒絕(rejected)
+  - 2.2.7.3 當onFulfilled不是一個函式，而且promise1是fulfilled(已實現)時，promise2必須使用與promise1同樣的值被fulfilled(實現)
+  - 2.2.7.4 當onRejected不是一個函式，而且promise1是rejected(已拒絕)時，promise2必須使用與promise1同樣的理由被rejected(拒絕)
+
+- 承上，rejected狀態的Promise物件，會一直往下找到有onRejected函式的then方法或是catch方法，才會再進入2.2.7.1規則，也就是正常的Promise解析程序
+- 怎麼決定回傳的新Promise物件的狀態 ?
+  - 主要是由經過onFulfilled或onRejected其中一個被執行後的回傳值`x`決定，以下為可能的狀況：
+    - `x`不是函式或物件，直接用x實現(fulfill)promise物件( 注意: undefined也算，所以沒回傳值算這個規則)
+    - `x`是promise，看x最後是實現(fulfill)或拒絕狀態，就直接對應到promise物件，回傳值或理由也會一併跟著
+    - `x`是函式或物件，指定then = x.then然後執行then，而如果不是`thenable`物件，則直接用x作實現(fulfill)promise物件。
+
+### then方法
+- then方法中onFulfilled函式的回傳值
+  - 值: then方法最後會回傳Promise物件，所以這個回傳值會跟著這個新Promise物件到下一個連鎖方法去，這個回傳值可以用下個then方法的onFulfilled函式取到第1個傳入參數值。
+  - promise物件
+  - thenable物件
+- then是promise物件中的方法，以onFulfilled與onRejected作為兩個傳入參數，有幾個規則需要遵守:
+  - 當onFulfilled或onRejected不是函式時，忽略跳過
+  - 當promise是fulfilled時，執行onFulfilled函式，並帶有promise的value作為onFulfilled函式的傳入參數值
+  - 當promise是rejected時，執行onRejected函式，並帶有promise的reason作為onRejected函式的傳入參數值
+- then方法最後還要回傳一個新的 promise 物件
+
+### 靜態方法 Promise.resolve與Promise.reject
+- Promise.resolve 相當於直接回傳一個以then方法實現的新Promise物件，帶有傳入的參數值
+  - Promise.resolve(value);
+  - Promise.resolve(promise);
+  - Promise.resolve(thenable);
+
+- 直接用Promise.resolve代表這個新的Promise物件的狀態是直接設定為fulfilled(已實現)狀態，這方法只是方便產生根(第一個)Promise物件使用的，也就是除了用建構式的new Promise()外，提供另一種方式來產生新的Promise物件
+  - onRejected function 不會被 call
+- Promise.reject剛好與Promise.resolve相反，等於是要產生rejected(已拒絕)狀態的新Promise物件
+  - onFullfilled function 不會被 call
+
+- Promise.reject與Promise.resolve與使用Promise建構式的方式，在使用上仍然有大的不同，executor傳入參數可以讓程式設師自訂Promise產生的過程，而且在產生的過程中是throw safety(安全)的
+
+Note: 結論是Promise.reject或Promise.resolve只用於單純的傳入物件、值或外部的thenable物件，轉換為Promise物件的場合。如果你要把一整段程式碼語句或函式轉為Promise物件，不要用這兩個靜態方法，要使用Promise建構式來產生物件才是正解。
 
 
 
