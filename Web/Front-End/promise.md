@@ -1,5 +1,10 @@
 # Promise
-[Reference](https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_a_plus.html)
+[Reference1](https://eyesofkids.gitbooks.io/javascript-start-es6-promise/content/contents/promise_a_plus.html)
+
+[Reference2](https://vinta.ws/code/es6-promise-notes.html)
+
+[Reference3](https://developers.google.com/web/fundamentals/primers/promises)
+
 - Promise 結構是異步執行的控制流程架構
 
 ## 異步執行流程語法結構之實作內容（ES6）
@@ -180,5 +185,95 @@
 
 Note: 結論是Promise.reject或Promise.resolve只用於單純的傳入物件、值或外部的thenable物件，轉換為Promise物件的場合。如果你要把一整段程式碼語句或函式轉為Promise物件，不要用這兩個靜態方法，要使用Promise建構式來產生物件才是正解。
 
+舉個例子：
+
+```js
+checkCredentials = () => {
+    let idToken = localStorage.getItem('some token');
+    if ( idToken ) {
+      return fetch(`https://someValidateEndpoint`, {
+        headers: {
+          Authorization: `Bearer ${idToken}`
+        }
+      })
+    } else {
+      throw new Error('No Token Found In Local Storage')
+    }
+  }
+```
+
+這個時候需要同時處理同步跟異步的錯誤，像這樣：
+```js
+try {
+  function onFulfilled() { ... do the rest of your logic }
+  function onRejected() { // handle async failure - like network timeout }
+  checkCredentials(x).then(onFulfilled, onRejected);
+} catch (e) {
+  // Error('No Token Found In Local Storage')
+  // handle synchronous failure
+} 
+```
+
+這時如果使用 Promise.reject
+```js
+checkCredentials = () => {
+  let idToken = localStorage.getItem('some_token');
+  if (!idToken) {
+    return Promise.reject('No Token Found In Local Storage')
+  }
+  return fetch(`https://someValidateEndpoint`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`
+    }
+  })
+}
+```
+
+那麼就只需要用一個catch()處理 network failure 和 async failure
+
+```js
+checkCredentials()
+      .catch((error) => if ( error == 'No Token' ) {
+      // do no token modal
+      } else if ( error === 400 ) {
+      // do not authorized modal. etc.
+      }
+```
+
+--
+
+Promise.resolve(xxx); 就是把 xxx 包裝成 Promise object
+然後 resolve() 它
+如果 xxx 已經是 Promise object 了，則會 clone 一個新的
+
+Promise.resolve(42);
+
+# equals to
+
+new Promise((resolve) => {
+  resolve(42);
+});
 
 
+# Rules
+
+## Promises following the spec must follow a specific set of rules:
+
+- A promise or “thenable” is an object that supplies a standard-compliant .then() method.
+- A pending promise may transition into a fulfilled or rejected state.
+- A fulfilled or rejected promise is settled, and must not transition into any other state.
+- Once a promise is settled, it must have a value (which may be undefined). That value must not change.
+
+## The .then() method must comply with these rules:
+
+- Both onFulfilled() and onRejected() are optional.
+- If the arguments supplied are not functions, they must be ignored.
+onFulfilled() will be called after the promise is fulfilled, with the promise’s value as the first argument.
+- onRejected() will be called after the promise is rejected, with the reason for rejection as the first argument. The reason may be any valid JavaScript value, but because rejections are essentially synonymous with exceptions, I recommend using Error objects.
+- Neither onFulfilled() nor onRejected() may be called more than once.
+- .then() may be called many times on the same promise. In other words, a promise can be used to aggregate callbacks.
+- .then() must return a new promise, promise2.
+- If onFulfilled() or onRejected() return a value `x`, and `x` is a promise, promise2 will lock in with (assume the same state and value as) `x`. Otherwise, promise2 will be fulfilled with the value of `x`.
+- If either onFulfilled or onRejected throws an exception e, promise2 must be rejected with e as the reason.
+- If onFulfilled is not a function and promise1 is fulfilled, promise2 must be fulfilled with the same value as promise1.
+- If onRejected is not a function and promise1 is rejected, promise2 must be rejected with the same reason as promise1.
