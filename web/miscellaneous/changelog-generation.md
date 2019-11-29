@@ -17,6 +17,7 @@
 | auto update `CHANGELOG.md`                 | x               | v                |v ⚠️    |v                |
 | no conventional commit messages are needed | v               | x                |x      |x                |
 | auto tag (local)                           | x               | x                |v      |v                |
+| auto tag (origin)                          | x               | x                |x      |x                |
 | auto tag (upstream)                        | x               | x                |x      |x                |
 | auto generate release note                 | x               | v                |x      |x                |
 
