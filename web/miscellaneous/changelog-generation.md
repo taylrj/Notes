@@ -17,6 +17,7 @@
 | auto create tag (upstream)               | x               | v                |v      |x                |
 | auto create release node                 | x               | v                |x      |x                |
 
+---
 
 ### 1. [**changelog-maker**](https://github.com/nodejs/changelog-maker)
 
