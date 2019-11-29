@@ -14,9 +14,10 @@
 |                                            |  changelog-maker|  semantic-release|  lerna| standard-version|
 | -------------------------------------------| ----------------|------------------|-------|-----------------|
 | auto bump version in `package.json`        | x               | x                |v      |v                |
-| auto update `CHANGELOG.md`                 | x               | v                |v ⚠️     |v                |
+| auto update `CHANGELOG.md`                 | x               | v                |v ⚠️    |v                |
 | no conventional commit messages are needed | v               | x                |x      |x                |
 | auto tag (local)                           | x               | x                |v      |v                |
+| auto tag (upstream)                        | x               | x                |x      |x                |
 | auto generate release note                 | x               | v                |x      |x                |
 
 ---
@@ -30,7 +31,7 @@
 - Cons:
   - only print to stdout
   - no auto bump version
-  - no auto tag on `local` and `upstream`
+  - no auto tag on `local` and `origin`
   - [does not work on Windows ](https://github.com/nodejs/changelog-maker/issues/63)
 - Notes:
   - no conventional commit messages are needed
@@ -41,7 +42,7 @@
 
 - Pros: 
   - [auto generate changelog](https://github.com/semantic-release/changelog)
-  - auto tag and release note on `upstream`
+  - auto tag and release note on `origin`
 - Cons:
   - `CHANGELOG.md` will be updated for **each release**
   - no auto bump version in `package.json`
