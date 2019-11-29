@@ -8,14 +8,14 @@
 
 ## Options
 
-|                                          |  changelog-maker|  semantic-release| lerna| standard-version|
-| -----------------------------------------| ----------------|------------------|------|-----------------|
-| auto bump version in `package.json`      | x               | x                |v     |v                |
-| auto update `CHANGELOG.md`               | x               | v                |v     |v                |
-| no structured commit messages are needed | v               | x                |x     |x                |
-| auto create tag (local)                  | x               | x                |v     |v                |
-| auto create tag (upstream)               | x               | v                |v     |x                |
-| auto create release node                 | x               | v                |x     |x                |
+|                                          |  changelog-maker|  semantic-release|  lerna| standard-version|
+| -----------------------------------------| ----------------|------------------|-------|-----------------|
+| auto bump version in `package.json`      | x               | x                |v      |v                |
+| auto update `CHANGELOG.md`               | x               | v                |v ⚠️     |v                |
+| no structured commit messages are needed | v               | x                |x      |x                |
+| auto create tag (local)                  | x               | x                |v      |v                |
+| auto create tag (upstream)               | x               | v                |v      |x                |
+| auto create release node                 | x               | v                |x      |x                |
 
 
 ### 1. [**changelog-maker**](https://github.com/nodejs/changelog-maker)
